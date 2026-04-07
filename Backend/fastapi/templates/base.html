@@ -8,238 +8,187 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 
+    <style>
+        /* Map Jinja variables to CSS variables for much cleaner styling */
+        :root {
+            --primary: {{ theme.colors.primary }};
+            --secondary: {{ theme.colors.secondary }};
+            --accent: {{ theme.colors.accent }};
+            --bg: {{ theme.colors.background }};
+            --card: {{ theme.colors.card }};
+            --text: {{ theme.colors.text }};
+            --text-sec: {{ theme.colors.text_secondary }};
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            /* Creating a smoother, ambient, floating orb background */
+            background-image: 
+                radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 40%),
+                radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 40%),
+                radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--card) 40%, transparent), transparent 60%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: color-mix(in srgb, var(--card) 45%, transparent);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-pill {
+            border-radius: 9999px; /* Fully rounded */
+        }
+
+        /* Modernized Inputs/Dropdowns */
+        .theme-select {
+            appearance: none;
+            background: color-mix(in srgb, var(--bg) 60%, transparent);
+            color: var(--text);
+            border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+            border-radius: 999px;
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-select:hover, .theme-select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
+        }
+
+        /* Custom nav link transitions */
+        .nav-link {
+            color: var(--text-sec);
+            transition: all 0.2s ease-in-out;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: color-mix(in srgb, var(--primary) 15%, transparent);
+        }
+
+        /* Keeps existing `.app-panel` class functional for your block content */
+        .app-panel {
+            background: color-mix(in srgb, var(--card) 65%, transparent);
+            backdrop-filter: blur(12px);
+            border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+
     <script>
+        /* Tell Tailwind to use our CSS variables */
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '{{ theme.colors.primary }}',
-                        secondary: '{{ theme.colors.secondary }}',
-                        accent: '{{ theme.colors.accent }}',
-                        background: '{{ theme.colors.background }}',
-                        card: '{{ theme.colors.card }}',
-                        text: '{{ theme.colors.text }}',
-                        'text-secondary': '{{ theme.colors.text_secondary }}'
+                        primary: 'var(--primary)',
+                        secondary: 'var(--secondary)',
+                        accent: 'var(--accent)',
+                        background: 'var(--bg)',
+                        card: 'var(--card)',
+                        text: 'var(--text)',
+                        'text-secondary': 'var(--text-sec)'
                     }
                 }
             }
         }
     </script>
-
-    <style>
-        body {
-            background-color: {{ theme.colors.background }};
-            color: {{ theme.colors.text }};
-        }
-
-        .theme-card {
-            background-color: {{ theme.colors.card }};
-        }
-
-        .active-link {
-            background-color: rgba(255,255,255,0.08);
-            color: var(--tw-color-primary);
-        }
-    </style>
 </head>
 
-<body class="min-h-screen flex flex-col">
-
-<!-- NAVBAR -->
-<nav class="theme-card border-b shadow-sm sticky top-0 z-50 backdrop-blur">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-
-            <!-- LEFT -->
-            <div class="flex items-center gap-6">
-                <h1 class="text-xl md:text-2xl font-bold text-primary flex items-center gap-2">
-                    <i class="fas fa-paper-plane"></i>
-                    Telegram Stremio
-                </h1>
-
-                {% if current_user %}
-                <div class="hidden md:flex items-center gap-2">
-                    <a href="/" class="nav-link {% if request.url.path == '/' %}active-link{% endif %}">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a>
-                    <a href="/media/manage" class="nav-link {% if '/media' in request.url.path %}active-link{% endif %}">
-                        <i class="fas fa-photo-film"></i> Media
-                    </a>
-                    <a href="/admin/dashboard" class="nav-link {% if '/admin/dashboard' in request.url.path %}active-link{% endif %}">
-                        <i class="fas fa-chart-line"></i> Admin
-                    </a>
-                    <a href="/admin/subscriptions" class="nav-link {% if '/subscriptions' in request.url.path %}active-link{% endif %}">
-                        <i class="fas fa-credit-card"></i> Subscriptions
-                    </a>
-                    <a href="/admin/access" class="nav-link {% if '/access' in request.url.path %}active-link{% endif %}">
-                        <i class="fas fa-user-shield"></i> Access
-                    </a>
-                </div>
-                {% endif %}
+<body class="relative pt-24 pb-12 antialiased selection:bg-primary selection:text-white">
+    
+    <nav class="fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] max-w-6xl z-50 glass-panel glass-pill px-6 py-3 flex justify-between items-center transition-all duration-300">
+        
+        <a href="/" class="flex items-center gap-3 group">
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_0_15px_var(--primary)] group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-play text-white text-xs"></i>
             </div>
+            <span class="text-lg md:text-xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                TG Stremio
+            </span>
+        </a>
 
-            <!-- RIGHT -->
-            <div class="flex items-center gap-3 relative">
+        {% if current_user %}
+        <div class="hidden lg:flex items-center bg-black/10 rounded-full px-2 py-1 gap-1">
+            <a href="/" class="nav-link px-4 py-2 rounded-full text-sm font-medium"><i class="fa-solid fa-house mr-2"></i>Home</a>
+            <a href="/media/manage" class="nav-link px-4 py-2 rounded-full text-sm font-medium"><i class="fa-solid fa-film mr-2"></i>Media</a>
+            <a href="/admin/dashboard" class="nav-link px-4 py-2 rounded-full text-sm font-medium"><i class="fa-solid fa-chart-line mr-2"></i>Admin</a>
+            <a href="/admin/subscriptions" class="nav-link px-4 py-2 rounded-full text-sm font-medium"><i class="fa-solid fa-bolt mr-2"></i>Subs</a>
+            <a href="/admin/access" class="nav-link px-4 py-2 rounded-full text-sm font-medium"><i class="fa-solid fa-shield-halved mr-2"></i>Access</a>
+        </div>
+        {% endif %}
 
-                <!-- THEME -->
-                <form method="post" action="/set-theme" id="theme-form">
-                    <select name="theme" onchange="this.form.submit()"
-                        class="theme-card border rounded-md px-2 py-1 text-sm">
+        <div class="flex items-center gap-4">
+            <div class="relative hidden sm:block">
+                <form method="post" action="/set-theme" id="theme-form" class="m-0">
+                    <select name="theme" onchange="document.getElementById('theme-form').submit()" class="theme-select">
                         {% for theme_key, theme_data in themes.items() %}
                         <option value="{{ theme_key }}" {% if current_theme==theme_key %}selected{% endif %}>
                             {{ theme_data.name }}
                         </option>
                         {% endfor %}
                     </select>
-                </form>
-
-                {% if current_user %}
-                <!-- PROFILE DROPDOWN -->
-                <div class="relative">
-                    <button id="profile-btn" class="flex items-center gap-2 text-sm">
-                        <i class="fas fa-user-circle text-lg"></i>
-                        <span class="hidden sm:block">{{ current_user }}</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-
-                    <div id="profile-menu" class="hidden absolute right-0 mt-2 w-40 theme-card border rounded-lg shadow-lg py-2">
-                        <a href="/logout" class="dropdown-link text-red-500">Logout</a>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-text-secondary">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
                     </div>
+                </form>
+            </div>
+
+            <div class="h-6 w-px bg-text opacity-20 hidden sm:block"></div>
+
+            {% if current_user %}
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex flex-col items-end">
+                    <span class="text-xs font-bold text-text">{{ current_user }}</span>
+                    <span class="text-[10px] text-green-400 uppercase tracking-wider">Online</span>
                 </div>
-                {% else %}
-                <a href="/login"
-                    class="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-sm transition">
-                    Login
+                <a href="/logout" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300">
+                    <i class="fa-solid fa-arrow-right-from-bracket md:mr-2"></i><span class="hidden md:inline">Logout</span>
                 </a>
-                {% endif %}
+            </div>
+            {% else %}
+            <a href="/login" class="bg-primary hover:bg-primary/80 text-white shadow-lg shadow-primary/30 px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300">
+                Login <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
+            </a>
+            {% endif %}
+        </div>
+    </nav>
 
-                <!-- MOBILE BUTTON -->
-                <button id="menu-btn" class="md:hidden text-xl">
-                    <i class="fas fa-bars"></i>
-                </button>
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mt-auto w-full max-w-5xl mx-auto px-6 py-8">
+        <div class="glass-panel rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-brands fa-telegram text-primary text-xl"></i>
+                <p class="text-text-secondary text-sm font-medium">© 2026 Telegram Stremio</p>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <a href="/status" class="text-sm font-medium text-text-secondary hover:text-primary transition-colors flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> System Status
+                </a>
+                <a href="/stremio" class="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+                    <i class="fa-solid fa-book-open mr-1"></i> Guide
+                </a>
             </div>
         </div>
-    </div>
-
-    <!-- MOBILE MENU -->
-    {% if current_user %}
-    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4 animate-slideDown">
-        <div class="flex flex-col gap-2">
-            <a href="/" class="mobile-link">Dashboard</a>
-            <a href="/media/manage" class="mobile-link">Media</a>
-            <a href="/admin/dashboard" class="mobile-link">Admin</a>
-            <a href="/admin/subscriptions" class="mobile-link">Subscriptions</a>
-            <a href="/admin/access" class="mobile-link">Access</a>
-        </div>
-    </div>
-    {% endif %}
-</nav>
-
-<!-- MAIN -->
-<main class="flex-1">
-    {% block content %}{% endblock %}
-</main>
-
-<!-- FOOTER -->
-<footer class="theme-card border-t mt-auto text-text">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-3">
-            <p class="theme-text-secondary text-sm">© 2026 Telegram Stremio. All rights reserved.</p>
-            <div class="flex gap-4">
-                <a href="/status" class="footer-link">Status</a>
-                <a href="/stremio" class="footer-link">Stremio Guide</a>
-            </div>
-        </div>
-    </div>
-</footer>
-
-<!-- STYLES -->
-<style>
-    .theme-primary { background-color: {{ theme.colors.primary }}; }
-    .theme-secondary { background-color: {{ theme.colors.secondary }}; }
-    .theme-accent { background-color: {{ theme.colors.accent }}; }
-    .theme-text-secondary { color: {{ theme.colors.text_secondary }}; }
-
-    .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 14px;
-        transition: 0.2s;
-    }
-
-    .nav-link:hover {
-        background-color: rgba(255,255,255,0.05);
-        color: var(--tw-color-primary);
-    }
-
-    .mobile-link {
-        padding: 10px;
-        border-radius: 6px;
-        font-size: 14px;
-    }
-
-    .mobile-link:hover {
-        background-color: rgba(255,255,255,0.05);
-    }
-
-    .dropdown-link {
-        display: block;
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-
-    .dropdown-link:hover {
-        background-color: rgba(255,255,255,0.05);
-    }
-
-    .footer-link {
-        font-size: 14px;
-        transition: 0.2s;
-    }
-
-    .footer-link:hover {
-        color: var(--tw-color-primary);
-    }
-
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-slideDown {
-        animation: slideDown 0.25s ease;
-    }
-</style>
-
-<!-- SCRIPT -->
-<script>
-    const btn = document.getElementById('menu-btn');
-    const menu = document.getElementById('mobile-menu');
-    const profileBtn = document.getElementById('profile-btn');
-    const profileMenu = document.getElementById('profile-menu');
-
-    if (btn) {
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
-    }
-
-    if (profileBtn) {
-        profileBtn.addEventListener('click', () => {
-            profileMenu.classList.toggle('hidden');
-        });
-    }
-
-    document.addEventListener('click', (e) => {
-        if (profileBtn && !profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
-            profileMenu.classList.add('hidden');
-        }
-    });
-</script>
+    </footer>
 
 </body>
 </html>
